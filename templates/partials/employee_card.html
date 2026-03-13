@@ -1,0 +1,55 @@
+{% comment %}
+Context expected: data (dict with 'employee', 'status', 'record')
+Status can be: 'not_started', 'clocked_in', 'clocked_out', 'absent', 'error'
+{% endcomment %}
+
+<div id="employee-card-{{ data.employee.id }}" 
+     class="rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer
+        {% if data.status == 'not_started' %} bg-white border border-gray-200 
+        {% elif data.status == 'clocked_in' %} bg-green-50 border-2 border-green-500
+        {% elif data.status == 'clocked_out' %} bg-gray-100 border border-gray-300 opacity-80
+        {% else %} bg-red-50 border border-red-200 {% endif %}"
+     hx-post="{% url 'core:toggle_attendance' data.employee.id %}"
+     hx-target="#employee-card-{{ data.employee.id }}"
+     hx-swap="outerHTML">
+    
+    <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-900 truncate">{{ data.employee.full_name }}</h3>
+            <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none rounded-full
+                {% if data.status == 'not_started' %} text-gray-800 bg-gray-200
+                {% elif data.status == 'clocked_in' %} text-green-800 bg-green-200
+                {% elif data.status == 'clocked_out' %} text-gray-600 bg-gray-300
+                {% else %} text-red-800 bg-red-200 {% endif %}">
+                
+                {% if data.status == 'not_started' %} 
+                    Pending
+                {% elif data.status == 'clocked_in' %} 
+                    In
+                {% elif data.status == 'clocked_out' %} 
+                    Out
+                {% else %}
+                    Issue
+                {% endif %}
+            </span>
+        </div>
+        
+        <p class="text-sm font-medium text-gray-500 mb-4">{{ data.employee.department }}</p>
+        
+        <div class="text-sm text-gray-700">
+            {% if data.record and data.record.time_in %}
+                <p><strong>In:</strong> {{ data.record.time_in|time:"g:i A" }}</p>
+            {% else %}
+                <p class="text-gray-400 italic">Not clocked in</p>
+            {% endif %}
+
+            {% if data.record and data.record.time_out %}
+                <p><strong>Out:</strong> {{ data.record.time_out|time:"g:i A" }}</p>
+            {% elif data.status == 'clocked_in' %}
+                <p class="text-green-600 font-medium animate-pulse mt-1">Currently Working...</p>
+            {% else %}
+                <p class="text-gray-400 italic">No checkout</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

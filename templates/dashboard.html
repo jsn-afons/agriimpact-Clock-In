@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard | Erica SignIn{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-0">
+    <div class="mb-8 pb-4 border-b border-gray-200 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-900">Analytics Dashboard</h1>
+            <p class="mt-2 text-sm text-gray-500">Business insights and KPIs for the current week.</p>
+        </div>
+        <div>
+            <a href="{% url 'admin:core_attendancerecord_changelist' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Export Data (Admin)
+            </a>
+        </div>
+    </div>
+
+    <!-- Hero Cards (KPIs) -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-8">
+        <!-- Card 1 -->
+        <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 border-blue-500">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Avg Arrival Time (This Week)</dt>
+                            <dd class="text-2xl font-semibold text-gray-900">{{ avg_arrival_time }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 border-green-500">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Avg Hours Logged (This Week)</dt>
+                            <dd class="text-2xl font-semibold text-gray-900">{{ avg_hours_spent }} <span class="text-sm font-normal text-gray-500">hrs</span></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white overflow-hidden shadow rounded-lg border-l-4 border-red-500">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-red-100 rounded-md p-3">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">The Ghost Metric (Missing Today)</dt>
+                            <dd class="text-2xl font-semibold text-gray-900">{{ ghost_metric }} <span class="text-sm font-normal text-gray-500">employees</span></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Anomaly Reports Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        
+        <!-- Early Birds & Late Offenders -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Punctuality Analytics</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Early Birds -->
+                <div>
+                    <h3 class="text-sm font-medium text-green-600 mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        Top 5 Early Birds
+                    </h3>
+                    <ul class="space-y-3">
+                        {% for stat in early_birds %}
+                            <li class="flex justify-between items-center text-sm">
+                                <span class="font-medium text-gray-700">{{ stat.employee.full_name }}</span>
+                                <span class="text-gray-500 bg-gray-100 px-2 py-1 rounded">{{ stat.avg_arrival_str }}</span>
+                            </li>
+                        {% empty %}
+                            <li class="text-sm text-gray-400 italic">Not enough data.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Late Offenders -->
+                <div>
+                    <h3 class="text-sm font-medium text-red-600 mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                        Top 5 Late Arrivals
+                    </h3>
+                    <ul class="space-y-3">
+                        {% for stat in late_offenders %}
+                            <li class="flex justify-between items-center text-sm">
+                                <span class="font-medium text-gray-700">{{ stat.employee.full_name }}</span>
+                                <span class="text-gray-500 bg-gray-100 px-2 py-1 rounded">{{ stat.avg_arrival_str }}</span>
+                            </li>
+                        {% empty %}
+                            <li class="text-sm text-gray-400 italic">Not enough data.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Early Departures List -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Early Departures Today</h2>
+            <p class="text-xs text-gray-500 mb-4">Employees who clocked out before 5:00 PM.</p>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dept</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Out</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for record in early_departures %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ record.employee.full_name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record.employee.department }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">{{ record.time_out|time:"g:i A" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center italic">No early departures logged today.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js Visualizations -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        
+        <!-- Punctuality Line Chart -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Punctuality Trend (Before 9 AM)</h2>
+            <div class="relative h-64">
+                <canvas id="punctualityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Overtime Bar Chart -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Overtime Heatmap (Hrs Beyond 8)</h2>
+            <div class="relative h-64">
+                <canvas id="overtimeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Department Pie Chart (Spans full width on lg screens or stays half) -->
+        <div class="bg-white shadow rounded-lg p-6 lg:col-span-2 flex flex-col items-center">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2 w-full text-left">Avg Hours Logged by Department</h2>
+            <div class="relative h-72 w-full md:w-1/2">
+                <canvas id="departmentChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart.js Scripts -->
+{{ chart_punctuality|json_script:"punctuality-data" }}
+{{ chart_overtime|json_script:"overtime-data" }}
+{{ chart_department|json_script:"department-data" }}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Parse data safely from django json_script tags
+        const punctData = JSON.parse(document.getElementById('punctuality-data').textContent);
+        const otData = JSON.parse(document.getElementById('overtime-data').textContent);
+        const deptData = JSON.parse(document.getElementById('department-data').textContent);
+
+        // 1. Punctuality Line Chart
+        new Chart(document.getElementById('punctualityChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: punctData.labels,
+                datasets: [{
+                    label: '# of People Arriving Before 9 AM',
+                    data: punctData.data,
+                    borderColor: 'rgb(59, 130, 246)', // Tailwind blue-500
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 2. Overtime Bar Chart
+        new Chart(document.getElementById('overtimeChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: otData.labels,
+                datasets: [{
+                    label: 'Total Overtime Hours',
+                    data: otData.data,
+                    backgroundColor: 'rgb(239, 68, 68)', // Tailwind red-500
+                    borderRadius: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 3. Department Pie Chart
+        new Chart(document.getElementById('departmentChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: deptData.labels,
+                datasets: [{
+                    label: 'Avg Hours Logged',
+                    data: deptData.data,
+                    backgroundColor: [
+                        'rgb(99, 102, 241)', // indigo
+                        'rgb(16, 185, 129)', // emerald
+                        'rgb(245, 158, 11)', // amber
+                        'rgb(236, 72, 153)', // pink
+                        'rgb(14, 165, 233)'  // sky
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
