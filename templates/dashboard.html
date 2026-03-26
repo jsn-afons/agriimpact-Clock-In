@@ -160,12 +160,12 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for record in early_departures %}
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{
-                                record.employee.full_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ record.employee.department
-                                }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">{{
-                                record.time_out|time:"g:i A" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ record.employee.full_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ record.employee.department }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">
+                                {{ record.time_out|time:"g:i A" }}</td>
                         </tr>
                         {% empty %}
                         <tr>
